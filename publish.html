@@ -1,0 +1,50 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>HEB OOH publish bridge</title></head>
+<body style="font-family:sans-serif;color:#888;font-size:13px">HEB OOH publishing bridge — used automatically by the H-E-B OOH Program app.
+<script>
+  var OBF='Z2l0aHViX3BhdF8xMUNDNEwzMkkwR3Vwb3k4N2I0dlNPX1NYdHlaa3dvanpEdHp0VzlTZU5OSFRPWmFwOURlbDhvY2F2Rmo2dlhBd1ZVM1BBWUhYSzYwbngzSWhs';
+  var O='willbailes1-glitch', R='heb-ooh-reviews';
+  function hdrs(){ return {'Authorization':'Bearer '+atob(OBF),'Accept':'application/vnd.github+json'}; }
+  async function shaOf(path){
+    var dir=path.split('/').slice(0,-1).join('/'), name=path.split('/').pop();
+    try{
+      var r=await fetch('https://api.github.com/repos/'+O+'/'+R+'/contents/'+dir,{headers:hdrs(),cache:'no-store'});
+      if(!r.ok) return null;
+      var items=await r.json();
+      var hit=(Array.isArray(items)?items:[]).find(function(x){return x.name===name;});
+      return hit?hit.sha:null;
+    }catch(e){ return null; }
+  }
+  window.addEventListener('message', async function(ev){
+    var d=ev.data||{};
+    if(d.cmd==='ghput' && Array.isArray(d.files)){
+      var results=[];
+      for(var i=0;i<d.files.length;i++){
+        var f=d.files[i];
+        try{
+          var sha=await shaOf(f.path);
+          var body={message:f.msg||('update '+f.path), content:f.b64};
+          if(sha) body.sha=sha;
+          var r=await fetch('https://api.github.com/repos/'+O+'/'+R+'/contents/'+f.path,{method:'PUT',headers:hdrs(),body:JSON.stringify(body)});
+          results.push({path:f.path, ok:r.ok, status:r.status});
+        }catch(e){ results.push({path:f.path, ok:false, err:String(e)}); }
+      }
+      ev.source.postMessage({cmd:'ghput-result', id:d.id, results:results}, '*');
+    }
+    if(d.cmd==='ghget'){
+      var out={cmd:'ghget-result', id:d.id, ok:false, json:null};
+      try{
+        var r2=await fetch('https://api.github.com/repos/'+O+'/'+R+'/contents/'+d.path,{headers:hdrs(),cache:'no-store'});
+        if(r2.ok){
+          var j=await r2.json();
+          var bin=atob(String(j.content||'').replace(/\s/g,''));
+          var bytes=new Uint8Array(bin.length);
+          for(var k=0;k<bin.length;k++) bytes[k]=bin.charCodeAt(k);
+          out.json=JSON.parse(new TextDecoder().decode(bytes));
+          out.ok=true;
+        }
+      }catch(e){}
+      ev.source.postMessage(out, '*');
+    }
+  });
+</script></body>body></html>
+</script></title></head></html>
