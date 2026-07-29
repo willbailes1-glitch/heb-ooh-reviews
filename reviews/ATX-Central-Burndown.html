@@ -6,7 +6,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;margin:0;background:#F6F5F3;color:#
 header{background:#C8102E;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{background:#fff;color:#C8102E;font-weight:800;border-radius:18px;padding:6px 14px}
 main{max-width:1500px;margin:0 auto;padding:16px}
-.wrap{display:grid;grid-template-columns:5fr 6fr;gap:14px;align-items:start}
+.wrap{display:grid;grid-template-columns:11fr 9fr;gap:14px;align-items:start}
 .wrap.wide{grid-template-columns:1fr}
 #cards{max-height:700px;overflow:auto;padding-right:2px}
 .wrap.wide #cards{max-height:none}
@@ -61,6 +61,9 @@ textarea{width:100%;font:inherit;min-height:120px;border:1px solid #ddd;border-r
 <div class="ctl"><select id="fV"><option value="">All Vendors</option></select><select id="fF"><option value="">All Formats</option></select><select id="fR"><option value="">All Reads</option></select><span style="flex:1"></span><div class="viewtog"><button id="vTable" class="on">🛍 Table View</button><button id="vGrid">▤ Grid View</button></div></div>
 <div id="cards"></div>
 </div></div>
+<div id="cartBox" style="background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px 16px;margin:16px 0">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h3 style="margin:0">🛒 Campaign Cart</h3><span style="flex:1"></span><div class="viewtog"><button id="cSum" class="on">Summary</button><button id="cDet">Details</button></div></div>
+<div id="cart" style="margin-top:10px"></div></div>
 <div id="apprBox"><h3 style="margin:0 0 6px">Approve this campaign</h3>
 <p class="sm">Your name: <input id="who" placeholder="name" style="font:inherit;padding:6px 10px;border:1px solid #ddd;border-radius:8px"></p>
 <button class="appr" id="appr">✅ Approve Campaign</button>
@@ -241,6 +244,34 @@ function drawBar(){
     h += '<span style="color:'+(left<0?'#C8102E':'#1E7B34')+';font-weight:800">'+fmtUSD(left)+' <span class="sm" style="font-weight:400">left of '+fmtUSD(P.budget)+' budget</span></span>'; }
   document.getElementById('bar').innerHTML = h;
 }
+var cartView = 'summary';
+document.getElementById('cSum').onclick = function(){ cartView='summary'; this.className='on'; document.getElementById('cDet').className=''; drawCart(); };
+document.getElementById('cDet').onclick = function(){ cartView='details'; this.className='on'; document.getElementById('cSum').className=''; drawCart(); };
+function drawCart(){
+  var host = document.getElementById('cart');
+  var items = P.opts.filter(function(o){ return sel[o.key]; });
+  if(!items.length){ host.innerHTML = '<span class="sm">Nothing in the campaign yet — use Add on any option.</span>'; return; }
+  var t = totals();
+  if(cartView==='summary'){
+    var by = {};
+    items.forEach(function(o){ var f = o.fmt||'Other'; var g = by[f] = by[f]||{n:0,per:0,cost:0,one:0};
+      g.n++; if(o.rate!=null) g.per+=o.rate; if(o.cost!=null) g.cost+=o.cost; g.one+=o.oneTime||0; });
+    var h = '';
+    Object.keys(by).sort().forEach(function(f){ var g = by[f];
+      h += '<div style="display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #f0f0f0"><span><b>'+g.n+'×</b> '+f+'</span><span style="flex:1"></span><span class="sm">'+fmtUSD(g.per)+'/period'+(g.one?' · '+fmtUSD(g.one)+' one-time':'')+'</span><span style="width:120px;text-align:right"><b>'+fmtUSD(g.cost)+'</b></span></div>'; });
+    h += '<div style="display:flex;gap:10px;padding:9px 0 0;font-size:15px"><span><b>'+t.n+' option'+(t.n===1?'':'s')+'</b></span><span style="flex:1"></span><span class="sm">'+fmtUSD(t.per)+'/period · one-time '+fmtUSD(t.one)+'</span><span style="width:120px;text-align:right"><b>'+fmtUSD(t.cost)+'</b></span></div>';
+    host.innerHTML = h;
+  } else {
+    var rows = items.map(function(o){
+      return '<tr><td><b'+(o.uoo?' style="color:#7B3FA0"':'')+'>'+o.id+'</b></td><td>'+o.vendor+'</td><td>'+o.fmt+'</td>'+
+        '<td class="sm">'+(o.s?o.s+' → '+o.e:'campaign dates')+'</td>'+
+        '<td style="text-align:right">'+fmtUSD(o.rate)+'</td><td style="text-align:right">'+o.periods+'</td>'+
+        '<td style="text-align:right"><b>'+fmtUSD(o.cost)+'</b></td><td style="text-align:right" class="sm">'+(o.oneTime?fmtUSD(o.oneTime):'—')+'</td></tr>';
+    }).join('');
+    host.innerHTML = '<div class="tblwrap"><table class="gtab"><thead><tr><th>Unit #</th><th>Vendor</th><th>Format</th><th>Dates</th><th style="text-align:right">$/period</th><th style="text-align:right">Periods</th><th style="text-align:right">Campaign</th><th style="text-align:right">One-time</th></tr></thead><tbody>'+rows+
+      '</tbody><tfoot><tr><td colspan="6" style="text-align:right"><b>Total</b></td><td style="text-align:right"><b>'+fmtUSD(t.cost)+'</b></td><td style="text-align:right"><b>'+fmtUSD(t.one)+'</b></td></tr></tfoot></table></div>';
+  }
+}
 function btnHtml(o, on){
   return '<button class="'+(on?'rm':'add')+'" onclick="tog(\''+o.key.replace(/'/g,"\\'")+'\')">'+(on?'✕ Remove from campaign':'＋ Add to campaign')+'</button>';
 }
@@ -292,7 +323,7 @@ function drawCards(){
     }).join('');
   }
 }
-function tog(k){ if(sel[k]) delete sel[k]; else sel[k]=true; drawCards(); drawBar(); drawMap(); }
+function tog(k){ if(sel[k]) delete sel[k]; else sel[k]=true; drawCards(); drawBar(); drawMap(); drawCart(); }
 function lb(src){ document.getElementById('lbimg').src = src; document.getElementById('lb').style.display='flex'; }
 document.getElementById('appr').onclick = async function(){
   var t = totals();
@@ -345,6 +376,6 @@ document.getElementById('appr').onclick = async function(){
     location.href = 'mailto:?subject='+encodeURIComponent('APPROVED: '+P.title+' (OOH campaign)')+'&body='+encodeURIComponent(text.slice(0,1800));
   }
 };
-fillFilters(); drawMap(); drawBar(); drawCards();
+fillFilters(); drawMap(); drawBar(); drawCards(); drawCart();
 
 </script></body></html>
