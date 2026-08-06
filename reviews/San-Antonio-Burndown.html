@@ -9,7 +9,7 @@ h1,h2,h3,.logo,.big,button.appr{font-family:Archivo,Inter,"Segoe UI",sans-serif}
 header{background:#C8102E;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{background:#fff;color:#C8102E;font-weight:800;border-radius:18px;padding:6px 14px}
 main{max-width:none;margin:0 auto;padding:16px 22px}
-.wrap{display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,34%,540px);gap:14px;align-items:start}
+.wrap{display:grid;grid-template-columns:minmax(370px,44%) minmax(0,1fr);gap:14px;align-items:start}
 .wrap>div{min-width:0}
 .wrap.wide{grid-template-columns:1fr}
 #cards{max-height:700px;overflow:auto;padding-right:2px}
@@ -19,11 +19,13 @@ main{max-width:none;margin:0 auto;padding:16px 22px}
 .gtab th{position:sticky;top:0;background:#C8102E;color:#fff;padding:7px 9px;text-align:left;white-space:nowrap}
 .gtab td{padding:6px 9px;border-top:1px solid #eee;white-space:nowrap}
 @media(max-width:940px){.wrap{grid-template-columns:1fr}}
-#map{height:520px;border-radius:12px;border:1px solid #ddd;margin-bottom:6px;transition:height .25s}
-#map.tall{height:660px}
+#map{aspect-ratio:1/1;height:auto;min-height:520px;border-radius:12px;border:1px solid #ddd;margin-bottom:6px}
+#map.tall{height:660px;aspect-ratio:auto}
 .hint{font-size:12px;color:#777;margin-bottom:12px}
 .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
 .ck{display:flex;align-items:center;gap:5px;border:1px solid #ddd;border-radius:10px;padding:5px 10px;font-size:12.5px;background:#fff;cursor:pointer}
+.mapbtn{border:1px solid #C8102E;color:#C8102E;background:#fff;border-radius:10px;padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer}
+.mapbtn.on{background:#C8102E;color:#fff}
 .viewtog{display:flex;border:1px solid #ddd;border-radius:10px;overflow:hidden;background:#fff}
 .viewtog button{border:0;border-radius:0;padding:7px 13px;font-size:13px}
 .viewtog button.on{background:#C8102E;color:#fff;font-weight:700}
@@ -59,8 +61,8 @@ textarea{width:100%;font:inherit;min-height:120px;border:1px solid #ddd;border-r
 <main><p class="sm" style="font-size:14px">Review the proposed out-of-home options below. Use <b>Add</b> / <b>Remove</b> to adjust the campaign — the totals update live. When it looks right, press <b>Approve Campaign</b> at the bottom.</p>
 <div class="bar" id="bar"></div>
 <div class="wrap" id="wrap"><div>
-<div class="ctl"><div class="viewtog"><button id="bStreet" class="on">🗺 Street</button><button id="bSat">🛰 Satellite</button></div><label class="ck"><input type="checkbox" id="ckHebs"> Show H-E-B stores</label><label class="ck"><input type="checkbox" id="ckComp"> 🎯 Show competitors</label><label class="ck"><input type="checkbox" id="ckRadius"> ◎ Requested radius</label><label class="ck"><input type="checkbox" id="ckHide"> Hide unselected</label><label class="ck"><input type="checkbox" id="ckWide"> ⛶ Expanded map</label></div>
 <div id="map"></div>
+<div class="ctl" style="margin:8px 0 0"><div class="viewtog"><button id="bStreet" class="on">🗺 Street</button><button id="bSat">🛰 Satellite</button></div><button class="mapbtn" id="ckHebs">Add HEBs</button><button class="mapbtn" id="ckComp">🎯 Add Blunting</button><button class="mapbtn" id="ckRadius">◎ Requested Radius</button><label class="ck"><input type="checkbox" id="ckHide"> Hide unselected</label><label class="ck"><input type="checkbox" id="ckWide"> ⛶ Expanded map</label></div>
 <div class="hint">Gray = static · dark gray = digital · black = Unique OOH. Options in the campaign turn <b style="color:#F28C28">orange</b> (static), <b style="color:#1F3A93">navy</b> (digital), <b style="color:#7B3FA0">purple</b> (Unique OOH). Dashed/solid lines are transit coverage. Turn on H-E-Bs or competitors and <b>click one to set it as a target</b> — distances to targets show on every card. Click a board pin to jump to its card.</div>
 </div><div>
 <div class="ctl"><select id="fV"><option value="">All Vendors</option></select><select id="fF"><option value="">All Formats</option></select><select id="fR"><option value="">All Reads</option></select><span class="sm" style="display:flex;align-items:center;gap:4px">$ ≤ <input id="fMax" type="number" min="0" step="any" placeholder="max $/period" title="Show only options at or under this cost per period" style="width:108px;padding:6px 9px;border:1px solid #ddd;border-radius:10px;font:inherit"></span><span style="flex:1"></span><div class="viewtog"><button id="vTable" class="on">🛍 Table View</button><button id="vGrid">▤ Grid View</button></div></div>
@@ -169,10 +171,10 @@ function drawMap(){
 }
 
 var hebLayer = null, compLayer = null;
-document.getElementById('ckHebs').onchange = function(e){
+document.getElementById('ckHebs').onclick = function(){
   if(!HASMAP) return;
-  if(hebLayer){ map.removeLayer(hebLayer); hebLayer = null; }
-  if(e.target.checked && P.hebs.length){
+  if(hebLayer){ map.removeLayer(hebLayer); hebLayer = null; this.classList.remove('on'); return; }
+  if(P.hebs.length){
     hebLayer = L.layerGroup();
     P.hebs.forEach(function(s,i){
       var mk = L.marker([s.lat,s.lon], {icon: hebIcon(!!tH[i]), zIndexOffset:-100}).addTo(hebLayer);
@@ -185,12 +187,13 @@ document.getElementById('ckHebs').onchange = function(e){
       });
     });
     hebLayer.addTo(map);
+    this.classList.add('on');
   }
 };
-document.getElementById('ckComp').onchange = function(e){
+document.getElementById('ckComp').onclick = function(){
   if(!HASMAP) return;
-  if(compLayer){ map.removeLayer(compLayer); compLayer = null; }
-  if(e.target.checked && P.comps.length){
+  if(compLayer){ map.removeLayer(compLayer); compLayer = null; this.classList.remove('on'); return; }
+  if(P.comps.length){
     compLayer = L.layerGroup();
     P.comps.forEach(function(w,i){
       var mk = L.marker([w.lat,w.lon], {icon: compIcon(w.brand,!!tC[i]), zIndexOffset:-100}).addTo(compLayer);
@@ -203,13 +206,14 @@ document.getElementById('ckComp').onchange = function(e){
       });
     });
     compLayer.addTo(map);
+    this.classList.add('on');
   }
 };
 var radiusLayer = null;
-document.getElementById('ckRadius').onchange = function(e){
+document.getElementById('ckRadius').onclick = function(){
   if(!HASMAP) return;
-  if(radiusLayer){ map.removeLayer(radiusLayer); radiusLayer = null; }
-  if(e.target.checked && P.targets.length){
+  if(radiusLayer){ map.removeLayer(radiusLayer); radiusLayer = null; this.classList.remove('on'); return; }
+  if(P.targets.length){
     radiusLayer = L.layerGroup();
     P.targets.forEach(function(t){
       var color = FIN_KC[t.kind] || FIN_KC.custom, r = t.r || 3;
@@ -218,6 +222,7 @@ document.getElementById('ckRadius').onchange = function(e){
         .bindPopup('<b>'+(t.t||'Target')+'</b><br>'+r+'-mile requested radius'+(t.blurb?'<br>'+t.blurb:''));
     });
     radiusLayer.addTo(map);
+    this.classList.add('on');
   }
 };
 document.getElementById('ckHide').onchange = function(e){ hideUnsel = e.target.checked; drawMap(); };
