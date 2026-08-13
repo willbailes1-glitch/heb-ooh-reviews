@@ -46,7 +46,7 @@ select{font:inherit;padding:7px 10px;border:1px solid #ddd;border-radius:10px;ba
 .chip.u{background:#F3E8FB;color:#7B3FA0;font-weight:700}
 .dn{font-size:12px;color:#946200;margin-top:2px}
 .mappop{width:248px;font-size:12.5px;line-height:1.45}
-.mappop img.mimg{width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;display:block}
+.mappop img.mimg{width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-bottom:6px;display:block;cursor:zoom-in}
 .mappop .mtitle{font-weight:800;font-size:14px;margin-bottom:1px}
 .mappop .mloc{color:#666;margin-bottom:6px}
 .mappop .mrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #eee;padding:2.5px 0}
@@ -150,16 +150,15 @@ function pinPopHtml(o){
   function add(l,v){ if(v!=null && v!=='') rows += '<div class="mrow"><span>'+l+'</span><b>'+v+'</b></div>'; }
   add('Vendor', o.vendor);
   add('Format', o.fmt);
-  add('Market', o.market);
   add('Size', o.size);
   var fr = [o.face,o.read].filter(Boolean).join(' / ');
   add('Face / Read', fr);
   if(o.imps!=null) add('Weekly Impr.', fmtN(o.imps));
   if(o.rate!=null) add('Rate / Period', fmtUSD(o.rate));
   add('Flight', effS(o) ? effS(o)+' → '+effE(o) : 'campaign dates');
-  add('Status', sel[o.key] ? '🛒 In campaign' : 'Not in campaign');
+  if(o.lat!=null && o.lon!=null) add('Lat / Long', (+o.lat).toFixed(5)+', '+(+o.lon).toFixed(5));
   return '<div class="mappop">'+
-    (o.photo ? '<img class="mimg" src="'+o.photo+'">' : '')+
+    (o.photo ? '<img class="mimg" src="'+o.photo+'" title="Click to view full size" onclick="lb(this.src)">' : '')+
     '<div class="mtitle">'+(o.id||'Board')+'</div>'+
     (o.desc ? '<div class="mloc">'+o.desc+'</div>' : '')+
     rows+'</div>';
