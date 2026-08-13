@@ -11,16 +11,29 @@ header{background:#C8102E;color:#fff;padding:14px 22px;display:flex;align-items:
 main{max-width:none;margin:0 auto;padding:16px 22px}
 .wrap{display:grid;grid-template-columns:minmax(370px,44%) minmax(0,1fr);gap:14px;align-items:start}
 .wrap>div{min-width:0}
-.wrap.wide{grid-template-columns:1fr}
 #cards{max-height:700px;overflow:auto;padding-right:2px}
-.wrap.wide #cards{max-height:none}
+.wrap.overlay{display:block;position:relative;grid-template-columns:none}
+.wrap.overlay #map{height:calc(100vh - 210px);min-height:560px;max-height:940px;aspect-ratio:auto}
+.wrap.overlay #cardsCol{position:absolute;top:12px;left:12px;z-index:500;width:min(440px,calc(100% - 60px));max-height:min(calc(100vh - 236px),914px);display:flex;flex-direction:column;box-sizing:border-box;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.30);padding:10px 12px;overflow:hidden}
+.wrap.overlay #cards{max-height:none;overflow:auto;flex:1;min-height:0}
+.wrap.overlay .panelbar{display:flex}
+.wrap.overlay #cardsCol.collapsed{width:auto;padding:6px}
+.wrap.overlay #cardsCol.collapsed .ctl,.wrap.overlay #cardsCol.collapsed #cards{display:none}
+.panelbar{display:none;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.panelbar button{padding:4px 11px;font-weight:800;border-radius:8px}
+.wrap.overlay #cards .card{flex-direction:column;gap:8px}
+.wrap.overlay #cards .card>img,.wrap.overlay #cards .card>.noph{width:100%;height:150px;flex:none}
+.wrap.overlay #cards .card>div{width:100%}
+.wrap.overlay #cards .card .add,.wrap.overlay #cards .card .rm{flex:1 0 100%;order:9}
+.wrap.overlay #cards .card div[style*="text-overflow"]{white-space:normal !important;overflow:visible !important}
 .tblwrap{overflow:auto;border-radius:12px;border:1px solid #ddd}
 .gtab{width:100%;border-collapse:collapse;background:#fff;font-size:12.5px}
 .gtab th{position:sticky;top:0;background:#C8102E;color:#fff;padding:7px 9px;text-align:left;white-space:nowrap}
 .gtab td{padding:6px 9px;border-top:1px solid #eee;white-space:nowrap}
+.gtab tr[data-k]{cursor:pointer}
+.gtab tr[data-k]:hover{background:#FFF7EC}
 @media(max-width:940px){.wrap{grid-template-columns:1fr}}
 #map{aspect-ratio:1/1;height:auto;min-height:520px;border-radius:12px;border:1px solid #ddd;margin-bottom:6px}
-#map.tall{height:660px;aspect-ratio:auto}
 .hint{font-size:12px;color:#777;margin-bottom:12px}
 .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
 .ck{display:flex;align-items:center;gap:5px;border:1px solid #ddd;border-radius:10px;padding:5px 10px;font-size:12.5px;background:#fff;cursor:pointer}
@@ -34,8 +47,8 @@ select{font:inherit;padding:7px 10px;border:1px solid #ddd;border-radius:10px;ba
 .big{font-size:26px;font-weight:800}
 .card{display:flex;gap:10px;background:#fff;border:1px solid #ddd;border-radius:12px;padding:8px;margin-bottom:8px}
 .card.on{border-color:#1E7B34;box-shadow:0 0 0 2px rgba(30,123,52,.25)}
-.card img{width:150px;height:100px;object-fit:cover;border-radius:8px;background:#eee;cursor:zoom-in}
-.noph{width:150px;height:100px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px;flex:none}
+.card img{width:330px;height:210px;object-fit:cover;border-radius:8px;background:#eee;cursor:zoom-in}
+.noph{width:330px;height:210px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px;flex:none}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:10px}
 .gcard{background:#fff;border:1px solid #ddd;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
 .gcard.on{border-color:#1E7B34;box-shadow:0 0 0 2px rgba(30,123,52,.25)}
@@ -52,6 +65,8 @@ select{font:inherit;padding:7px 10px;border:1px solid #ddd;border-radius:10px;ba
 .mappop .mrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #eee;padding:2.5px 0}
 .mappop .mrow span{color:#888}
 .mappop .mrow b{text-align:right}
+.mappop .mact{margin-top:9px}
+.mappop .mact button{width:100%;font-size:13px;padding:7px 12px}
 button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid #ddd;background:#fff;padding:8px 14px}
 button.add{background:#C8102E;color:#fff;border-color:#C8102E;font-weight:700}
 button.rm{background:#666;color:#fff;border-color:#666;font-weight:700}
@@ -69,9 +84,10 @@ textarea{width:100%;font:inherit;min-height:120px;border:1px solid #ddd;border-r
 <div class="bar" id="bar"></div>
 <div class="wrap" id="wrap"><div>
 <div id="map"></div>
-<div class="ctl" style="margin:8px 0 0"><div class="viewtog"><button id="bStreet" class="on">🗺 Street</button><button id="bSat">🛰 Satellite</button></div><button class="mapbtn" id="ckHebs">Add HEBs</button><button class="mapbtn" id="ckComp">🎯 Add Blunting</button><button class="mapbtn" id="ckHold" title="Show the region's currently contracted boards as green pins — what H-E-B already has while reviewing this campaign">🏠 Add Holdings</button><button class="mapbtn" id="ckRadius">◎ Requested Radius</button><label class="ck"><input type="checkbox" id="ckHide"> Hide unselected</label><label class="ck"><input type="checkbox" id="ckWide"> ⛶ Expanded map</label></div>
+<div class="ctl" style="margin:8px 0 0"><div class="viewtog"><button id="bStreet" class="on">🗺 Street</button><button id="bSat">🛰 Satellite</button></div><button class="mapbtn" id="ckHebs">Add HEBs</button><button class="mapbtn" id="ckComp">🎯 Add Blunting</button><button class="mapbtn" id="ckHold" title="Show the region's currently contracted boards as green pins — what H-E-B already has while reviewing this campaign">🏠 Add Holdings</button><button class="mapbtn" id="ckRadius">◎ Requested Radius</button><label class="ck"><input type="checkbox" id="ckHide"> Hide the Gray Unselected Billboards from Map</label><label class="ck"><input type="checkbox" id="ckWide"> ⛶ Change to Expanded Map View</label></div>
 <div class="hint">Gray = static · dark gray = digital · black = Unique OOH. Options in the campaign turn <b style="color:#F28C28">orange</b> (static), <b style="color:#1F3A93">navy</b> (digital), <b style="color:#7B3FA0">purple</b> (Unique OOH). Dashed/solid lines are transit coverage. <b style="color:#1E7B34">Green</b> 🏠 pins = boards H-E-B already has under contract in this region. Turn on H-E-Bs or competitors and <b>click one to set it as a target</b> — distances to targets show on every card. Click a board pin to jump to its card.</div>
-</div><div>
+</div><div id="cardsCol">
+<div class="panelbar"><span class="sm">🛍 Options</span><button id="pnlTog" title="Collapse the options list so you can see the whole map">«</button></div>
 <div class="ctl"><select id="fV"><option value="">All Vendors</option></select><select id="fF"><option value="">All Formats</option></select><select id="fR"><option value="">All Reads</option></select><span class="sm" style="display:flex;align-items:center;gap:4px">$ ≤ <input id="fMax" type="number" min="0" step="any" placeholder="max $/period" title="Show only options at or under this cost per period" style="width:108px;padding:6px 9px;border:1px solid #ddd;border-radius:10px;font:inherit"></span><span style="flex:1"></span><div class="viewtog"><button id="vTable" class="on">🛍 Table View</button><button id="vGrid">▤ Grid View</button></div></div>
 <div id="cards"></div>
 </div></div>
@@ -119,9 +135,20 @@ function setBase(b){
 document.getElementById('bStreet').onclick = function(){ setBase('street'); };
 document.getElementById('bSat').onclick = function(){ setBase('sat'); };
 document.getElementById('ckWide').onchange = function(e){
-  document.getElementById('wrap').classList.toggle('wide', e.target.checked);
-  document.getElementById('map').classList.toggle('tall', e.target.checked);
+  document.getElementById('wrap').classList.toggle('overlay', e.target.checked);
+  syncCardsHeight();
+  if(!e.target.checked){
+    document.getElementById('cardsCol').classList.remove('collapsed');
+    document.getElementById('pnlTog').textContent = '«';
+  }
   setTimeout(function(){ try{ map.invalidateSize(); }catch(err){} }, 280);
+};
+document.getElementById('pnlTog').onclick = function(){
+  var col = document.getElementById('cardsCol');
+  var on = col.classList.toggle('collapsed');
+  this.textContent = on ? '»' : '«';
+  this.title = on ? 'Show the options list' : 'Collapse the options list so you can see the whole map';
+  setTimeout(function(){ try{ map.invalidateSize(); }catch(err){} }, 120);
 };
 
 var markers = {}, routeLayers = {};
@@ -161,7 +188,9 @@ function pinPopHtml(o){
     (o.photo ? '<img class="mimg" src="'+o.photo+'" title="Click to view full size" onclick="lb(this.src)">' : '')+
     '<div class="mtitle">'+(o.id||'Board')+'</div>'+
     (o.desc ? '<div class="mloc">'+o.desc+'</div>' : '')+
-    rows+'</div>';
+    rows+
+    '<div class="mact">'+btnHtml(o, !!sel[o.key])+'</div>'+
+    '</div>';
 }
 function drawMap(){
   if(!HASMAP) return;
@@ -339,13 +368,17 @@ function drawCart(){
     host.innerHTML = h;
   } else {
     var rows = items.map(function(o){
-      return '<tr><td><b'+(o.uoo?' style="color:#7B3FA0"':'')+'>'+o.id+'</b></td><td>'+o.vendor+'</td><td>'+o.fmt+'</td>'+
+      return '<tr data-k="'+o.key.replace(/"/g,'&quot;')+'" title="Show this board on the map"><td><b'+(o.uoo?' style="color:#7B3FA0"':'')+'>'+o.id+'</b></td><td>'+o.vendor+'</td><td>'+o.fmt+'</td>'+
         '<td class="sm">'+(effS(o)?effS(o)+' → '+effE(o):'campaign dates')+'</td>'+
         '<td style="text-align:right">'+fmtUSD(o.rate)+'</td><td style="text-align:right">'+effPeriods(o)+'</td>'+
         '<td style="text-align:right"><b>'+fmtUSD(effCost(o))+'</b></td><td style="text-align:right" class="sm">'+(effOne(o)?fmtUSD(effOne(o)):'—')+'</td></tr>';
     }).join('');
     host.innerHTML = '<div class="tblwrap"><table class="gtab"><thead><tr><th>Unit #</th><th>Vendor</th><th>Format</th><th>Dates</th><th style="text-align:right">$/period</th><th style="text-align:right">Periods</th><th style="text-align:right">Campaign</th><th style="text-align:right">One-time</th></tr></thead><tbody>'+rows+
       '</tbody><tfoot><tr><td colspan="6" style="text-align:right"><b>Total</b></td><td style="text-align:right"><b>'+fmtUSD(t.cost)+'</b></td><td style="text-align:right"><b>'+fmtUSD(t.one)+'</b></td></tr></tfoot></table></div>';
+    // pt142: a cart row acts like a click on that board's map pin
+    Array.prototype.forEach.call(host.querySelectorAll('tr[data-k]'), function(tr){
+      tr.onclick = function(){ panTo(tr.getAttribute('data-k')); };
+    });
   }
 }
 function btnHtml(o, on){
@@ -513,7 +546,11 @@ function panTo(k){
     if(b.isValid()) map.fitBounds(b.pad(0.15));
   } else if(o.lat!=null && o.lon!=null){
     map.setView([o.lat,o.lon], Math.max(map.getZoom(), 14));
-    L.popup({offset:[0,-26]}).setLatLng([o.lat,o.lon]).setContent('<b>'+o.id+'</b>'+(o.desc?'<br>'+o.desc:'')).openOn(map);
+    // pt142: open the marker's OWN info bubble (the full card) instead of a bare id/desc stub;
+    // fall back to the stub only when that pin isn't drawn (e.g. Hide-unselected is on).
+    var mk = markers[k];
+    if(mk){ mk.openPopup(); }
+    else { L.popup({offset:[0,-26]}).setLatLng([o.lat,o.lon]).setContent('<b>'+o.id+'</b>'+(o.desc?'<br>'+o.desc:'')).openOn(map); }
   }
   document.getElementById('map').scrollIntoView({behavior:'smooth', block:'center'});
 }
@@ -568,6 +605,23 @@ document.getElementById('appr').onclick = async function(){
     location.href = 'mailto:?subject='+encodeURIComponent('APPROVED: '+P.title+' (OOH campaign)')+'&body='+encodeURIComponent(text.slice(0,1800));
   }
 };
-fillFilters(); drawMap(); drawBar(); drawCards(); drawCart();
+/* pt144: the options list tracks the map's height in split view instead of a fixed 700px cap,
+   so on a big window both columns end at the same line. Overlay mode clears it — the floating
+   panel's own CSS is not !important, so a stale inline max-height would win and break it. */
+function syncCardsHeight(){
+  var w = document.getElementById('wrap'), m = document.getElementById('map'), c = document.getElementById('cards');
+  if(!w || !m || !c) return;
+  if(w.classList.contains('overlay')){ c.style.maxHeight = ''; return; }
+  var mr = m.getBoundingClientRect(), cr = c.getBoundingClientRect();
+  if(!mr.height) return;
+  c.style.maxHeight = Math.max(360, Math.round(mr.height - (cr.top - mr.top))) + 'px';
+}
+window.addEventListener('resize', syncCardsHeight);
+if(window.ResizeObserver){ try{ new ResizeObserver(syncCardsHeight).observe(document.getElementById('map')); }catch(e){} }
+fillFilters(); drawMap(); drawBar(); drawCards(); drawCart(); syncCardsHeight();
+/* 8/13 (Braden): Requested Radius ON by default — fire the same toggle the button uses, so the
+   ".on" pill state and the layer stay in lockstep. Silent no-op when the campaign carries no
+   targets (P.targets empty) or Leaflet never loaded. */
+try{ if(HASMAP && P.targets && P.targets.length) document.getElementById('ckRadius').onclick(); }catch(e){}
 
 </script></body></html>
