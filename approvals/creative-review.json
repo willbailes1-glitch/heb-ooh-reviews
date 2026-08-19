@@ -1,6 +1,6 @@
 {
  "by": "Andrea",
- "at": "2026-08-19T15:41:41.376Z",
+ "at": "2026-08-19T15:45:15.244Z",
  "changes": [
   {
    "k": "2465",
@@ -47,6 +47,153 @@
   {
    "k": "TX46B",
    "v": "MH Outdoor Media",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "TX114A",
+   "v": "MH Outdoor Media",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "TX305S",
+   "v": "Kenjoh Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005606",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005569",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "004807",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "004875",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005188",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "2_1963F",
+   "v": "Outfront Media",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005121",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005184",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "004756",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "010244",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "005540",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "010206",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "004742",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "40182",
+   "v": "Lamar Advertising",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "40021",
+   "v": "Lamar Advertising",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "004413",
+   "v": "Clear Channel Outdoor",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "1352",
+   "v": "Lamar Advertising",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "90391",
+   "v": "Lamar Advertising",
+   "name": "Cowboys: DeMo",
+   "mode": "next",
+   "date": "2026-08-26"
+  },
+  {
+   "k": "74",
+   "v": "Gunnarson Outdoor Advertising",
    "name": "Cowboys: DeMo",
    "mode": "next",
    "date": "2026-08-26"
